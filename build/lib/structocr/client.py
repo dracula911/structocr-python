@@ -82,7 +82,7 @@ class StructOCR:
         # Endpoint: /v1/driver-license
         return self._post_image('driver-license', file_path)
     
-    def scan_driver_license(self, file_path):
+    def scan_invoice(self, file_path):
         """
         Scan a Invoice.
         path: Path to the invoice image file.

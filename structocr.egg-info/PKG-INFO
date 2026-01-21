@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: structocr
-Version: 1.1.1
+Version: 1.1.2
 Summary: The official Python SDK for StructOCR API - Passport, ID card, Driver License OCR, and Invoice.
 Home-page: https://structocr.com
 Author: StructOCR Team
@@ -88,4 +88,4 @@ For full API documentation, response examples, and error codes, please visit the
 
 ## License
 
-MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.
+MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.cd
