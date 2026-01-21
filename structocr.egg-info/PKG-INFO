@@ -1,3 +1,32 @@
+Metadata-Version: 2.4
+Name: structocr
+Version: 1.0.1
+Summary: The official Python SDK for StructOCR API - Passport, ID, and Driver License OCR.
+Home-page: https://structocr.com
+Author: StructOCR Team
+Author-email: support@structocr.com
+Project-URL: Homepage, https://structocr.com
+Project-URL: Documentation, https://www.structocr.com/developers
+Project-URL: Source, https://github.com/structocr/structocr-python
+Project-URL: Tracker, https://github.com/structocr/structocr-python/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Image Recognition
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.25.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 # StructOCR Python SDK
 
 [![PyPI version](https://badge.fury.io/py/structocr.svg)](https://badge.fury.io/py/structocr)

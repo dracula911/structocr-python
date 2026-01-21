@@ -70,7 +70,7 @@ class StructOCR:
         path: Path to the ID card image file.
         Returns: Structured JSON data.
         """
-        # Endpoint: /v1/national-id (Assuming this is your endpoint naming)
+        # Endpoint: /v1/national-id 
         return self._post_image('national-id', file_path)
 
     def scan_driver_license(self, file_path):
@@ -79,5 +79,14 @@ class StructOCR:
         path: Path to the driver license image file.
         Returns: Structured JSON data.
         """
-        # Endpoint: /v1/driver-license (Assuming this is your endpoint naming)
+        # Endpoint: /v1/driver-license
         return self._post_image('driver-license', file_path)
+    
+    def scan_driver_license(self, file_path):
+        """
+        Scan a Invoice.
+        path: Path to the invoice image file.
+        Returns: Structured JSON data.
+        """
+        # Endpoint: /v1/invoice 
+        return self._post_image('invoice', file_path)
