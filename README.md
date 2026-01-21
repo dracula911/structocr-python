@@ -70,4 +70,4 @@ For full API documentation, response examples, and error codes, please visit the
 
 ## License
 
-MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.
+MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.cd
