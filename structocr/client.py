@@ -90,3 +90,12 @@ class StructOCR:
         """
         # Endpoint: /v1/invoice 
         return self._post_image('invoice', file_path)
+
+    def scan_vin(self, file_path):
+        """
+        Scan a VIN (Vehicle Identification Number).
+        path: Path to the VIN image file.
+        Returns: Structured JSON data.
+        """
+        # Endpoint: /v1/vin 
+        return self._post_image('vin', file_path)

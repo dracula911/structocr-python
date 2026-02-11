@@ -5,7 +5,7 @@
 
 **The official Python client for [StructOCR](https://structocr.com).**
 
-StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR** and **Invoice OCR** into your Python applications in minutes.
+StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR**, **Invoice OCR** and **VIN OCR** into your Python applications in minutes.
 
 👉 **[Get your Free API Key here](https://structocr.com)**
 
@@ -15,6 +15,7 @@ StructOCR is a powerful API tailored for developers to extract structured data f
 - **National ID OCR**: Support for ID cards with automatic field mapping.
 - **Driver License OCR**: Extract vehicle class, license number, and personal details. 
 - **Invoice OCR**:  Extract invoice number, currency, merchant, customer.
+- **VIN OCR**: Extract VIN (Vehicle Identification Number) from windshield or engine bay images.
 - **Secure & Fast**: Enterprise-grade encryption and sub-second response times.
 
 ## Installation
@@ -49,7 +50,7 @@ print(f"Passport Number: {result['data']['document_number']}")
 
 ```
 
-### 3. Scan a National ID or Driver License or Invoice
+### 3. Scan a National ID, Driver License, Invoice or VIN
 
 ```python
 # National ID OCR
@@ -59,7 +60,10 @@ id_data = client.scan_national_id('./docs/id_card.png')
 license_data = client.scan_driver_license('./docs/license.jpg')
 
 # Invoice OCR
-license_data = client.scan_invoice('./docs/invoice.jpg')
+invoice_data = client.scan_invoice('./docs/invoice.jpg')
+
+# VIN OCR
+vin_data = client.scan_vin('./docs/vin.jpg')
 
 ```
 
