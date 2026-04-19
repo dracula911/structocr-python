@@ -1,4 +1,3 @@
-
 # StructOCR Python SDK
 
 [![PyPI version](https://badge.fury.io/py/structocr.svg)](https://badge.fury.io/py/structocr)
@@ -9,6 +8,18 @@
 StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR**, **Invoice OCR**, **VIN OCR**, and **Container OCR** into your Python applications in minutes.
 
 👉 **[Get your Free API Key here](https://structocr.com)**
+
+---
+
+## 🚀 What's New in 1.1.6
+We've massively expanded our logistics and finance capabilities! The SDK now natively supports:
+* **Container OCR**: Accurately parse shipping container numbers from images.
+* **VIN OCR**: Read Vehicle Identification Numbers from windshields or chassis.
+* **Invoice OCR**: Automatically extract invoice numbers, currencies, merchants, and customers.
+
+Check out the [Quick Start](#3-scan-a-national-id-driver-license-invoice-vin-or-container) below to see how easy it is to use them!
+
+---
 
 ## Features
 

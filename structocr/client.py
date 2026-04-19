@@ -21,7 +21,7 @@ class StructOCR:
         self.session.headers.update({
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "User-Agent": "StructOCR-Python/1.1.5"
+            "User-Agent": "StructOCR-Python/1.1.6"
         })
 
     def _post_image(self, endpoint, file_path):
