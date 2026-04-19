@@ -1,3 +1,4 @@
+
 # StructOCR Python SDK
 
 [![PyPI version](https://badge.fury.io/py/structocr.svg)](https://badge.fury.io/py/structocr)
@@ -5,7 +6,7 @@
 
 **The official Python client for [StructOCR](https://structocr.com).**
 
-StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR**, **Invoice OCR** and **VIN OCR** into your Python applications in minutes.
+StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR**, **Invoice OCR**, **VIN OCR**, and **Container OCR** into your Python applications in minutes.
 
 👉 **[Get your Free API Key here](https://structocr.com)**
 
@@ -16,6 +17,7 @@ StructOCR is a powerful API tailored for developers to extract structured data f
 - **Driver License OCR**: Extract vehicle class, license number, and personal details. 
 - **Invoice OCR**:  Extract invoice number, currency, merchant, customer.
 - **VIN OCR**: Extract VIN (Vehicle Identification Number) from windshield or engine bay images.
+- **Container OCR**: Extract shipping container numbers accurately from images.
 - **Secure & Fast**: Enterprise-grade encryption and sub-second response times.
 
 ## Installation
@@ -24,7 +26,6 @@ Install the package via pip:
 
 ```bash
 pip install structocr
-
 ```
 
 ## Quick Start
@@ -36,7 +37,6 @@ from structocr import StructOCR
 
 # Initialize with your API Key
 client = StructOCR(api_key="sk_live_xxxxxxxx")
-
 ```
 
 ### 2. Scan a Passport (Passport OCR)
@@ -47,10 +47,9 @@ result = client.scan_passport('./docs/passport_sample.jpg')
 
 print(f"Name: {result['data']['name']}")
 print(f"Passport Number: {result['data']['document_number']}")
-
 ```
 
-### 3. Scan a National ID, Driver License, Invoice or VIN
+### 3. Scan a National ID, Driver License, Invoice, VIN, or Container
 
 ```python
 # National ID OCR
@@ -65,6 +64,8 @@ invoice_data = client.scan_invoice('./docs/invoice.jpg')
 # VIN OCR
 vin_data = client.scan_vin('./docs/vin.jpg')
 
+# Container OCR
+container_data = client.scan_container('./docs/container.jpg')
 ```
 
 ## Documentation
@@ -78,4 +79,4 @@ For full API documentation, response examples, and error codes, please visit the
 
 ## License
 
-MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.cd
+MIT License. See [LICENSE](https://opensource.org/licenses/MIT) for details.
