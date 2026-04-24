@@ -18,7 +18,7 @@ def test_sdk():
     # The script is in structocr-python/, image is in structocr/test/
     # So path is ../test/v22.jpeg
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    image_path = os.path.join(script_dir, "..", "test", "ct01.png")
+    image_path = os.path.join(script_dir, "..", "test", "hin01.jpg")
     
     if not os.path.exists(image_path):
         print(f"Error: Test image not found at: {image_path}")
@@ -29,8 +29,8 @@ def test_sdk():
     # 4. Call SDK Method
     try:
         # Assuming v22.jpeg is a VIN image based on filename pattern and recent tasks
-        print("Calling scan_vin()...")
-        result = client.scan_container(image_path)
+        print("Calling scan_receipt()...")
+        result = client.scan_hin(image_path)
         
         # 5. Output Result
         if result:

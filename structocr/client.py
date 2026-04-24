@@ -21,7 +21,7 @@ class StructOCR:
         self.session.headers.update({
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "User-Agent": "StructOCR-Python/1.1.6"
+            "User-Agent": "StructOCR-Python/1.2.0"
         })
 
     def _post_image(self, endpoint, file_path):
@@ -108,3 +108,21 @@ class StructOCR:
         """
         # Endpoint: /v1/container (这里假设你的后端路由是 container，如果不同请替换)
         return self._post_image('container', file_path)
+
+    def scan_hin(self, file_path):
+        """
+        Scan a Hull Identification Number (HIN) from a boat or watercraft.
+        path: Path to the HIN image file.
+        Returns: Structured JSON data.
+        """
+        # Endpoint: /v1/hin 
+        return self._post_image('hin', file_path)
+
+    def scan_receipt(self, file_path):
+        """
+        Scan a Retail/Dining Receipt for expense extraction.
+        path: Path to the receipt image file.
+        Returns: Structured JSON data.
+        """
+        # Endpoint: /v1/receipt 
+        return self._post_image('receipt', file_path)

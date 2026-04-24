@@ -5,31 +5,35 @@
 
 **The official Python client for [StructOCR](https://structocr.com).**
 
-StructOCR is a powerful API tailored for developers to extract structured data from identity documents with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**,  **Driver License OCR**, **Invoice OCR**, **VIN OCR**, and **Container OCR** into your Python applications in minutes.
+StructOCR is a powerful API tailored for developers to extract structured data from complex documents and physical assets with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**, **Driver License OCR**, **Invoice OCR**, **Receipt OCR**, **VIN OCR**, **HIN OCR**, and **Container OCR** into your Python applications in minutes.
 
 👉 **[Get your Free API Key here](https://structocr.com)**
 
----
+-----
 
-## 🚀 What's New in 1.1.6
-We've massively expanded our logistics and finance capabilities! The SDK now natively supports:
-* **Container OCR**: Accurately parse shipping container numbers from images.
-* **VIN OCR**: Read Vehicle Identification Numbers from windshields or chassis.
-* **Invoice OCR**: Automatically extract invoice numbers, currencies, merchants, and customers.
+## 🚀 What's New in 1.2.0
 
-Check out the [Quick Start](#3-scan-a-national-id-driver-license-invoice-vin-or-container) below to see how easy it is to use them!
+We've massively expanded our expense automation and marine capabilities\! The SDK now natively supports:
 
----
+  * **Receipt OCR**: Parse retail and dining receipts to extract merchants, individual line items, taxes, and totals.
+  * **HIN OCR**: Extract, parse, and validate Hull Identification Numbers from boats and watercraft.
+  * *Previous 1.1.6 additions (Container OCR, VIN OCR, Invoice OCR) remain fully supported.*
+
+Check out the [Quick Start](#quick-start) below to see how easy it is to use them!
+
+-----
 
 ## Features
 
-- **Passport OCR API**: Instantly extract MRZ, name, DOB, and expiry date from passports of 200+ countries.
-- **National ID OCR**: Support for ID cards with automatic field mapping.
-- **Driver License OCR**: Extract vehicle class, license number, and personal details. 
-- **Invoice OCR**:  Extract invoice number, currency, merchant, customer.
-- **VIN OCR**: Extract VIN (Vehicle Identification Number) from windshield or engine bay images.
-- **Container OCR**: Extract shipping container numbers accurately from images.
-- **Secure & Fast**: Enterprise-grade encryption and sub-second response times.
+  - **Passport OCR API**: Instantly extract MRZ, name, DOB, and expiry date from passports of 200+ countries.
+  - **National ID OCR**: Support for ID cards with automatic field mapping.
+  - **Driver License OCR**: Extract vehicle class, license number, and personal details.
+  - **Invoice OCR**: Extract invoice number, currency, merchant, customer, and financial totals.
+  - **Receipt OCR**: Extract merchants, dates, line items, taxes, and totals for expense management.
+  - **VIN OCR**: Extract VIN (Vehicle Identification Number) from windshield or engine bay images.
+  - **HIN OCR**: Validate and extract Hull Identification Numbers from marine vessels.
+  - **Container OCR**: Extract shipping container numbers accurately from images.
+  - **Secure & Fast**: Enterprise-grade encryption, SOC2 compliance, and sub-second response times with zero data retention.
 
 ## Installation
 
@@ -41,7 +45,7 @@ pip install structocr
 
 ## Quick Start
 
-### 1. Initialize the Client
+### 1\. Initialize the Client
 
 ```python
 from structocr import StructOCR
@@ -50,7 +54,7 @@ from structocr import StructOCR
 client = StructOCR(api_key="sk_live_xxxxxxxx")
 ```
 
-### 2. Scan a Passport (Passport OCR)
+### 2\. Scan a Passport (Passport OCR)
 
 ```python
 # Pass the path to the passport image file
@@ -60,7 +64,7 @@ print(f"Name: {result['data']['name']}")
 print(f"Passport Number: {result['data']['document_number']}")
 ```
 
-### 3. Scan a National ID, Driver License, Invoice, VIN, or Container
+### 3\. Scan Other Documents and Assets
 
 ```python
 # National ID OCR
@@ -72,8 +76,14 @@ license_data = client.scan_driver_license('./docs/license.jpg')
 # Invoice OCR
 invoice_data = client.scan_invoice('./docs/invoice.jpg')
 
+# Receipt OCR (New in 1.2.0)
+receipt_data = client.scan_receipt('./docs/receipt.jpg')
+
 # VIN OCR
 vin_data = client.scan_vin('./docs/vin.jpg')
+
+# HIN OCR (New in 1.2.0)
+hin_data = client.scan_hin('./docs/boat_hin.jpg')
 
 # Container OCR
 container_data = client.scan_container('./docs/container.jpg')
@@ -85,8 +95,8 @@ For full API documentation, response examples, and error codes, please visit the
 
 ## Requirements
 
-* Python 3.6+
-* `requests` library
+  * Python 3.7+
+  * `requests` library
 
 ## License
 
