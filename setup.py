@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="structocr",
-    version="1.3.0",
+    version="1.3.1",
     description="The official Python SDK for StructOCR API - Passport, ID card, Driver License OCR, Invoice, Receipts, VIN, HIN and Container OCR.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

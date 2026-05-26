@@ -11,7 +11,7 @@ StructOCR is a powerful API tailored for developers to extract structured data f
 
 -----
 
-## 🚀 What's New in 1.3.0
+## 🚀 What's New in 1.3.1
 
 We've massively upgraded our Identity Verification engine! 
 * **Hybrid VIZ + MRZ AI for National IDs**: The SDK now automatically cross-validates unstructured Visual Zone (VIZ) data against cryptographic Machine Readable Zone (MRZ) checksums (TD1/TD2) for zero hallucination. Raw MRZ lines are now accessible via `additional_fields`.
