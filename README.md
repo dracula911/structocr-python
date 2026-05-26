@@ -11,13 +11,11 @@ StructOCR is a powerful API tailored for developers to extract structured data f
 
 -----
 
-## 🚀 What's New in 1.2.0
+## 🚀 What's New in 1.3.0
 
-We've massively expanded our expense automation and marine capabilities\! The SDK now natively supports:
-
-  * **Receipt OCR**: Parse retail and dining receipts to extract merchants, individual line items, taxes, and totals.
-  * **HIN OCR**: Extract, parse, and validate Hull Identification Numbers from boats and watercraft.
-  * *Previous 1.1.6 additions (Container OCR, VIN OCR, Invoice OCR) remain fully supported.*
+We've massively upgraded our Identity Verification engine! 
+* **Hybrid VIZ + MRZ AI for National IDs**: The SDK now automatically cross-validates unstructured Visual Zone (VIZ) data against cryptographic Machine Readable Zone (MRZ) checksums (TD1/TD2) for zero hallucination. Raw MRZ lines are now accessible via `additional_fields`.
+* *Previous marine & expense additions (Receipt OCR, HIN OCR, Container OCR) remain fully supported.*
 
 Check out the [Quick Start](#quick-start) below to see how easy it is to use them!
 
@@ -26,7 +24,7 @@ Check out the [Quick Start](#quick-start) below to see how easy it is to use the
 ## Features
 
   - **Passport OCR API**: Instantly extract MRZ, name, DOB, and expiry date from passports of 200+ countries.
-  - **National ID OCR**: Support for ID cards with automatic field mapping.
+  - **National ID OCR**: Extract regional specific fields (CNP, CPF, NIN) and raw ICAO 9303 MRZ lines with hybrid validation.
   - **Driver License OCR**: Extract vehicle class, license number, and personal details.
   - **Invoice OCR**: Extract invoice number, currency, merchant, customer, and financial totals.
   - **Receipt OCR**: Extract merchants, dates, line items, taxes, and totals for expense management.

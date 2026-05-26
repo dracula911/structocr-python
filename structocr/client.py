@@ -21,7 +21,7 @@ class StructOCR:
         self.session.headers.update({
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "User-Agent": "StructOCR-Python/1.2.0"
+            "User-Agent": "StructOCR-Python/1.3.0"
         })
 
     def _post_image(self, endpoint, file_path):
@@ -69,6 +69,7 @@ class StructOCR:
         Scan a National ID card.
         path: Path to the ID card image file.
         Returns: Structured JSON data.
+                 Note: MRZ lines (if present) are located inside the 'additional_fields' object.
         """
         # Endpoint: /v1/national-id 
         return self._post_image('national-id', file_path)

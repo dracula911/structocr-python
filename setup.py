@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="structocr",
-    version="1.2.0",
+    version="1.3.0",
     description="The official Python SDK for StructOCR API - Passport, ID card, Driver License OCR, Invoice, Receipts, VIN, HIN and Container OCR.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -16,7 +16,7 @@ setup(
     # 2. 这里定义侧边栏的具体链接 (Homepage, Documentation, Source 等)
     project_urls={
         "Homepage": "https://structocr.com",
-        "Documentation": "https://www.structocr.com/developers", # 假设你的文档在这里
+        "Documentation": "https://structocr.com/developers", # 假设你的文档在这里
         "Source": "https://github.com/structocr/structocr-python",
         "Tracker": "https://github.com/structocr/structocr-python/issues", # 问题追踪
     },
