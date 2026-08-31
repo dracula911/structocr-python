@@ -1,108 +1,79 @@
 # StructOCR Python SDK
 
-[![PyPI version](https://badge.fury.io/py/structocr.svg)](https://badge.fury.io/py/structocr)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Official Python client for the [StructOCR API](https://structocr.com/developers).
 
-**The official Python client for [StructOCR](https://structocr.com).**
+The SDK accepts a local JPG, PNG, WebP, or PDF path, plus in-memory `bytes`. It validates the decoded file locally, converts it to Base64, and sends the API's required JSON payload: `{"img": "..."}`. The REST API itself does not accept file paths, bytes, URLs, or multipart uploads.
 
-StructOCR is a powerful API tailored for developers to extract structured data from complex documents and physical assets with high accuracy. This SDK helps you integrate **Passport OCR**, **National ID OCR**, **Driver License OCR**, **Invoice OCR**, **Receipt OCR**, **VIN OCR**, **HIN OCR**, **Container OCR**, and **License Plate OCR** into your Python applications in minutes.
-
-👉 **[Get your Free API Key here](https://structocr.com)**
-
------
-
-## 🚀 What's New in 1.4.0
-
-* **License Plate OCR**: We've launched a specialized ALPR engine optimized for SEA plates. It accurately extracts native scripts (Thai, Khmer, etc.), plate numbers, colors, and vehicle types without forcing foreign formatting rules.
-* *Previous updates (Hybrid VIZ + MRZ AI for National IDs, marine & expense additions) remain fully supported.*
-
-Check out the [Quick Start](#quick-start) below to see how easy it is to use them!
-
------
-
-## Features
-
-  - **Passport OCR API**: Instantly extract MRZ, name, DOB, and expiry date from passports of 200+ countries.
-  - **National ID OCR**: Extract regional specific fields (CNP, CPF, NIN) and raw ICAO 9303 MRZ lines with hybrid validation.
-  - **Driver License OCR**: Extract vehicle class, license number, and personal details.
-  - **License Plate OCR**: Extract SEA-optimized plate numbers, regional texts, plate colors, and vehicle types.
-  - **Invoice OCR**: Extract invoice number, currency, merchant, customer, and financial totals.
-  - **Receipt OCR**: Extract merchants, dates, line items, taxes, and totals for expense management.
-  - **VIN OCR**: Extract VIN (Vehicle Identification Number) from windshield or engine bay images.
-  - **HIN OCR**: Validate and extract Hull Identification Numbers from marine vessels.
-  - **Container OCR**: Extract shipping container numbers accurately from images.
-  - **Secure & Fast**: Enterprise-grade encryption, SOC2 compliance, and sub-second response times with zero data retention.
-
-## Installation
-
-Install the package via pip:
+## Install
 
 ```bash
-pip install structocr
-
+pip install --upgrade structocr
 ```
 
-## Quick Start
+Python 3.7+ is required.
 
-### 1. Initialize the Client
+## Quick start
+
+```bash
+export STRUCTOCR_API_KEY="YOUR_API_KEY"
+```
 
 ```python
 from structocr import StructOCR
 
-# Initialize with your API Key
-client = StructOCR(api_key="sk_live_xxxxxxxx")
+client = StructOCR()
+result = client.scan_passport("./passport.jpg")
 
+if result.get("success"):
+    data = result["data"]
+    print(data.get("passport_number"))
+    print(data.get("given_names"), data.get("surname"))
 ```
 
-### 2. Scan a Passport (Passport OCR)
+PDF paths work the same way:
 
 ```python
-# Pass the path to the passport image file
-result = client.scan_passport('./docs/passport_sample.jpg')
-
-print(f"Name: {result['data']['name']}")
-print(f"Passport Number: {result['data']['document_number']}")
-
+result = client.scan_invoice("./invoice.pdf")
 ```
 
-### 3. Scan Other Documents and Assets
+FastAPI and other server frameworks can pass uploaded bytes without a temporary file:
 
 ```python
-# License Plate OCR (New in 1.4.0)
-plate_data = client.scan_license_plate('./docs/license_plate.jpg')
-
-# National ID OCR
-id_data = client.scan_national_id('./docs/id_card.png')
-
-# Driver License OCR
-license_data = client.scan_driver_license('./docs/license.jpg')
-
-# Invoice OCR
-invoice_data = client.scan_invoice('./docs/invoice.jpg')
-
-# Receipt OCR
-receipt_data = client.scan_receipt('./docs/receipt.jpg')
-
-# VIN OCR
-vin_data = client.scan_vin('./docs/vin.jpg')
-
-# HIN OCR
-hin_data = client.scan_hin('./docs/boat_hin.jpg')
-
-# Container OCR
-container_data = client.scan_container('./docs/container.jpg')
-
+content = await upload.read()
+result = client.scan_passport(content)
 ```
 
-## Documentation
+## Methods
 
-For full API documentation, response examples, and error codes, please visit the [StructOCR Developer Docs](https://www.structocr.com/developers?ref=github).
+```text
+scan_passport(file)
+scan_national_id(file)
+scan_driver_license(file)
+scan_invoice(file)
+scan_receipt(file)
+scan_vin(file)
+scan_hin(file)
+scan_container(file)
+scan_license_plate(file)
+scan_vehicle_registration(file)
+scan_atm_cassette(file)
+get_account_balance()
+```
 
-## Requirements
+All document methods accept a local path or bytes. Supported decoded formats are JPG, PNG, WebP, and PDF, up to 4.5MB.
 
-* Python 3.7+
-* `requests` library
+## Configuration
+
+```python
+client = StructOCR(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.structocr.com/v1",
+    timeout=60,
+)
+```
+
+See the [API documentation](https://structocr.com/developers) for endpoint-specific response schemas and error codes.
 
 ## License
 
-MIT License. See [LICENSE](https://opensource.org/licenses/MIT) for details.
+MIT

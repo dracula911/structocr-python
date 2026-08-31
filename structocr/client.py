@@ -1,138 +1,125 @@
-import requests
-import os
 import base64
-import json
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
+
+import requests
+
+
+FileInput = Union[str, os.PathLike, bytes, bytearray, memoryview]
+MAX_FILE_SIZE = int(4.5 * 1024 * 1024)
+SUPPORTED_FORMATS = "JPG, PNG, WebP, and PDF"
+
 
 class StructOCR:
-    """
-    StructOCR Python Client
-    Get your API Key at: https://structocr.com
-    """
-    def __init__(self, api_key=None, base_url="https://api.structocr.com/v1"):
-        # Allow reading API Key from environment variables for better DX
-        self.api_key = api_key or os.environ.get('STRUCTOCR_API_KEY')
+    """Official Python client for the StructOCR Base64 JSON API."""
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: str = "https://api.structocr.com/v1",
+        timeout: float = 30.0,
+    ) -> None:
+        self.api_key = api_key or os.environ.get("STRUCTOCR_API_KEY")
         if not self.api_key:
             raise ValueError("API Key is required. Get one at https://structocr.com")
-        
-        self.base_url = base_url.rstrip('/')
+
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
         self.session = requests.Session()
-        
-        # Updated headers based on your API specification
         self.session.headers.update({
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "User-Agent": "StructOCR-Python/1.4.0"
+            "User-Agent": "StructOCR-Python/1.5.0",
         })
 
-    def _post_image(self, endpoint, file_path):
-        """
-        Internal method: Handle image encoding and API request.
-        """
-        url = f"{self.base_url}/{endpoint}"
-        
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
+    @staticmethod
+    def _read_file(file: FileInput) -> bytes:
+        if isinstance(file, (bytes, bytearray, memoryview)):
+            content = bytes(file)
+        else:
+            path = Path(file)
+            if not path.is_file():
+                raise FileNotFoundError(f"File not found: {path}")
+            content = path.read_bytes()
+
+        if not content:
+            raise ValueError("File is empty")
+        if len(content) > MAX_FILE_SIZE:
+            raise ValueError("File exceeds the maximum allowed size of 4.5MB")
+        if StructOCR._detect_mime(content) is None:
+            raise ValueError(f"Unsupported file format. Supported formats: {SUPPORTED_FORMATS}")
+        return content
+
+    @staticmethod
+    def _detect_mime(content: bytes) -> Optional[str]:
+        if content.startswith(b"%PDF"):
+            return "application/pdf"
+        if content.startswith(b"\xff\xd8\xff"):
+            return "image/jpeg"
+        if content.startswith(b"\x89PNG\r\n\x1a\n"):
+            return "image/png"
+        if len(content) >= 12 and content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+            return "image/webp"
+        return None
+
+    def _post_image(self, endpoint: str, file: FileInput) -> Dict[str, Any]:
+        """Read a local file or bytes and send it as Base64 JSON in ``img``."""
+        content = self._read_file(file)
+        payload = {"img": base64.b64encode(content).decode("ascii")}
 
         try:
-            # 1. Encode image to Base64
-            with open(file_path, "rb") as image_file:
-                base64_image = base64.b64encode(image_file.read()).decode('utf-8')
-
-            # 2. Prepare JSON payload
-            payload = {
-                "img": base64_image
-            }
-
-            # 3. Send Request
-            response = self.session.post(url, json=payload)
-            response.raise_for_status() # Raise error for 4xx/5xx responses
-            
+            response = self.session.post(
+                f"{self.base_url}/{endpoint}",
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
             return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            # Handle connection errors or API errors
-            raise Exception(f"API Request failed: {str(e)}")
+        except requests.exceptions.RequestException as error:
+            raise RuntimeError(f"API request failed: {error}") from error
 
-    # --- Public Methods for Developers ---
+    def get_account_balance(self) -> Dict[str, Any]:
+        """Return account-level and current-key usage from ``/account/balance``."""
+        try:
+            response = self.session.get(
+                f"{self.base_url}/account/balance",
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as error:
+            raise RuntimeError(f"API request failed: {error}") from error
 
-    def scan_passport(self, file_path):
-        """
-        Scan a Passport image.
-        path: Path to the passport image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/passport
-        return self._post_image('passport', file_path)
+    def scan_passport(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("passport", file)
 
-    def scan_national_id(self, file_path):
-        """
-        Scan a National ID card.
-        path: Path to the ID card image file.
-        Returns: Structured JSON data.
-                 Note: MRZ lines (if present) are located inside the 'additional_fields' object.
-        """
-        # Endpoint: /v1/national-id 
-        return self._post_image('national-id', file_path)
+    def scan_national_id(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("national-id", file)
 
-    def scan_driver_license(self, file_path):
-        """
-        Scan a Driver License.
-        path: Path to the driver license image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/driver-license
-        return self._post_image('driver-license', file_path)
-    
-    def scan_invoice(self, file_path):
-        """
-        Scan a Invoice.
-        path: Path to the invoice image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/invoice 
-        return self._post_image('invoice', file_path)
+    def scan_driver_license(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("driver-license", file)
 
-    def scan_vin(self, file_path):
-        """
-        Scan a VIN (Vehicle Identification Number).
-        path: Path to the VIN image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/vin 
-        return self._post_image('vin', file_path)
+    def scan_invoice(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("invoice", file)
 
-    def scan_container(self, file_path):
-        """
-        Scan a shipping container number.
-        path: Path to the container image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/container 
-        return self._post_image('container', file_path)
+    def scan_vin(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("vin", file)
 
-    def scan_hin(self, file_path):
-        """
-        Scan a Hull Identification Number (HIN) from a boat or watercraft.
-        path: Path to the HIN image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/hin 
-        return self._post_image('hin', file_path)
+    def scan_container(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("container", file)
 
-    def scan_receipt(self, file_path):
-        """
-        Scan a Retail/Dining Receipt for expense extraction.
-        path: Path to the receipt image file.
-        Returns: Structured JSON data.
-        """
-        # Endpoint: /v1/receipt 
-        return self._post_image('receipt', file_path)
-    
-    def scan_license_plate(self, file_path):
-        """
-        Scan a Vehicle License Plate (Optimized for Southeast Asia).
-        path: Path to the license plate image file.
-        Returns: Structured JSON data including plate_number, region_text, plate_color, etc.
-        """
-        # Endpoint: /v1/license-plate
-        return self._post_image('license-plate', file_path)
+    def scan_hin(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("hin", file)
+
+    def scan_receipt(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("receipt", file)
+
+    def scan_license_plate(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("license-plate", file)
+
+    def scan_vehicle_registration(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("vehicle-registration", file)
+
+    def scan_atm_cassette(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("atm-cassette", file)
