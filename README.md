@@ -2,7 +2,7 @@
 
 Official Python client for the [StructOCR API](https://structocr.com/developers).
 
-The SDK accepts a local JPG, PNG, WebP, or PDF path, plus in-memory `bytes`. It validates the decoded file locally, converts it to Base64, and sends the API's required JSON payload: `{"img": "..."}`. The REST API itself does not accept file paths, bytes, URLs, or multipart uploads.
+The SDK accepts a local JPG, PNG, WebP, or PDF path, plus in-memory `bytes`. It validates the decoded file locally, converts it to Base64, and sends JSON as `{"img": "..."}`. The REST API also supports multipart uploads; this SDK release keeps Base64 JSON as its default transport for backward compatibility.
 
 ## Install
 
@@ -57,10 +57,30 @@ scan_container(file)
 scan_license_plate(file)
 scan_vehicle_registration(file)
 scan_atm_cassette(file)
+scan_weighbridge_ticket(file)
 get_account_balance()
 ```
 
 All document methods accept a local path or bytes. Supported decoded formats are JPG, PNG, WebP, and PDF, up to 4.5MB.
+
+Receipt v2 provides a richer response. Enhanced accuracy requires v2 and costs 2 credits instead of the standard 1 credit:
+
+```python
+receipt = client.scan_receipt(
+    "./receipt.jpg",
+    response_version=2,
+    accuracy="enhanced",
+)
+```
+
+Weighbridge ticket example:
+
+```python
+result = client.scan_weighbridge_ticket("./weighbridge-ticket.jpg")
+if result.get("success"):
+    print(result["data"]["weights"])
+    print(result["data"]["validation"])
+```
 
 ## Configuration
 
@@ -73,6 +93,21 @@ client = StructOCR(
 ```
 
 See the [API documentation](https://structocr.com/developers) for endpoint-specific response schemas and error codes.
+
+## Errors
+
+API and network failures raise `StructOCRError`. Existing `except RuntimeError` code continues to work because `StructOCRError` extends `RuntimeError`.
+
+```python
+from structocr import StructOCRError
+
+try:
+    client.scan_passport("./passport.jpg")
+except StructOCRError as error:
+    print(error.status_code, error.code, error.retryable)
+```
+
+`retryable` is advisory only. The SDK does not automatically retry OCR requests because doing so without an idempotency key could charge a request twice.
 
 ## License
 

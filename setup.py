@@ -3,10 +3,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parent
+VERSION = {}
+exec((ROOT / "structocr" / "version.py").read_text(encoding="utf-8"), VERSION)
 
 setup(
     name="structocr",
-    version="1.5.0",
+    version=VERSION["__version__"],
     description="Official Python SDK for StructOCR Base64 document APIs, including images, PDFs, and account balance.",
     long_description=(ROOT / "README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",

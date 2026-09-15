@@ -4,7 +4,9 @@ import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
-from structocr import StructOCR
+import requests
+
+from structocr import StructOCR, StructOCRError, __version__
 from structocr.client import MAX_FILE_SIZE
 
 
@@ -15,6 +17,12 @@ PDF = b"%PDF-1.7\ntest"
 class StructOCRTests(unittest.TestCase):
     def setUp(self):
         self.client = StructOCR("test-key", base_url="https://example.test/v1")
+
+    def test_user_agent_uses_package_version(self):
+        self.assertEqual(
+            self.client.session.headers["User-Agent"],
+            f"StructOCR-Python/{__version__}",
+        )
 
     def test_path_is_sent_as_base64_json(self):
         response = Mock()
@@ -58,8 +66,46 @@ class StructOCRTests(unittest.TestCase):
         self.client._post_image = Mock(return_value={"success": True})
         self.client.scan_vehicle_registration(JPEG)
         self.client.scan_atm_cassette(JPEG)
+        self.client.scan_weighbridge_ticket(JPEG)
         self.assertEqual(self.client._post_image.call_args_list[0].args[0], "vehicle-registration")
         self.assertEqual(self.client._post_image.call_args_list[1].args[0], "atm-cassette")
+        self.assertEqual(self.client._post_image.call_args_list[2].args[0], "weighbridge-ticket")
+
+    def test_receipt_options_preserve_v1_and_map_v2_enhanced(self):
+        self.client._post_image = Mock(return_value={"success": True})
+        self.client.scan_receipt(JPEG)
+        self.client.scan_receipt(JPEG, response_version=2, accuracy="enhanced")
+
+        self.assertEqual(self.client._post_image.call_args_list[0].args, ("receipt", JPEG))
+        self.assertEqual(
+            self.client._post_image.call_args_list[1].kwargs["params"],
+            {"response_version": 2, "accuracy": "enhanced"},
+        )
+
+    def test_invalid_receipt_options_fail_before_request(self):
+        self.client._post_image = Mock(return_value={"success": True})
+        with self.assertRaises(StructOCRError) as caught:
+            self.client.scan_receipt(JPEG, response_version=1, accuracy="enhanced")
+        self.assertEqual(caught.exception.code, "INVALID_OPTIONS")
+        self.client._post_image.assert_not_called()
+
+    def test_structured_api_error(self):
+        response = Mock(status_code=503)
+        response.json.return_value = {
+            "success": False,
+            "code": "SYSTEM_BUSY",
+            "message": "Please try again later.",
+        }
+        response.raise_for_status.side_effect = requests.exceptions.HTTPError("503")
+        self.client.session.post = Mock(return_value=response)
+
+        with self.assertRaises(StructOCRError) as caught:
+            self.client.scan_passport(JPEG)
+
+        self.assertEqual(caught.exception.status_code, 503)
+        self.assertEqual(caught.exception.code, "SYSTEM_BUSY")
+        self.assertTrue(caught.exception.retryable)
+        self.assertEqual(caught.exception.details["success"], False)
 
     def test_balance_uses_get_without_body(self):
         response = Mock()

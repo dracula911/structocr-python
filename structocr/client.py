@@ -5,10 +5,32 @@ from typing import Any, Dict, Optional, Union
 
 import requests
 
+from .version import __version__
+
 
 FileInput = Union[str, os.PathLike, bytes, bytearray, memoryview]
 MAX_FILE_SIZE = int(4.5 * 1024 * 1024)
 SUPPORTED_FORMATS = "JPG, PNG, WebP, and PDF"
+RETRYABLE_STATUS_CODES = {429, 502, 503, 504}
+
+
+class StructOCRError(RuntimeError):
+    """Structured SDK error for API, network, and client failures."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: Optional[int] = None,
+        code: Optional[str] = None,
+        details: Any = None,
+        retryable: bool = False,
+    ) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+        self.code = code
+        self.details = details
+        self.retryable = retryable
 
 
 class StructOCR:
@@ -30,7 +52,7 @@ class StructOCR:
         self.session.headers.update({
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "User-Agent": "StructOCR-Python/1.5.0",
+            "User-Agent": f"StructOCR-Python/{__version__}",
         })
 
     @staticmethod
@@ -63,21 +85,74 @@ class StructOCR:
             return "image/webp"
         return None
 
-    def _post_image(self, endpoint: str, file: FileInput) -> Dict[str, Any]:
+    @staticmethod
+    def _response_data(response: requests.Response) -> Dict[str, Any]:
+        try:
+            data = response.json()
+        except ValueError as error:
+            raise StructOCRError(
+                "StructOCR API returned an invalid JSON response",
+                status_code=getattr(response, "status_code", None),
+                code="INVALID_RESPONSE",
+            ) from error
+        if not isinstance(data, dict):
+            raise StructOCRError(
+                "StructOCR API returned an invalid response object",
+                status_code=getattr(response, "status_code", None),
+                code="INVALID_RESPONSE",
+                details=data,
+            )
+        return data
+
+    @staticmethod
+    def _raise_api_error(response: requests.Response, error: Exception) -> None:
+        try:
+            details = response.json()
+        except ValueError:
+            details = None
+        status = getattr(response, "status_code", None)
+        status = status if isinstance(status, int) else None
+        code = None
+        message = None
+        if isinstance(details, dict):
+            code = details.get("code") or details.get("error")
+            message = details.get("message")
+        if not message:
+            message = f"StructOCR API request failed with HTTP {status or 'unknown'}"
+        raise StructOCRError(
+            message,
+            status_code=status,
+            code=code,
+            details=details,
+            retryable=status in RETRYABLE_STATUS_CODES,
+        ) from error
+
+    def _post_image(
+        self,
+        endpoint: str,
+        file: FileInput,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Read a local file or bytes and send it as Base64 JSON in ``img``."""
         content = self._read_file(file)
         payload = {"img": base64.b64encode(content).decode("ascii")}
 
         try:
-            response = self.session.post(
-                f"{self.base_url}/{endpoint}",
-                json=payload,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            return response.json()
+            request_kwargs: Dict[str, Any] = {"json": payload, "timeout": self.timeout}
+            if params is not None:
+                request_kwargs["params"] = params
+            response = self.session.post(f"{self.base_url}/{endpoint}", **request_kwargs)
         except requests.exceptions.RequestException as error:
-            raise RuntimeError(f"API request failed: {error}") from error
+            raise StructOCRError(
+                f"Network error while calling StructOCR API: {error}",
+                code="NETWORK_ERROR",
+                retryable=True,
+            ) from error
+        try:
+            response.raise_for_status()
+        except requests.exceptions.RequestException as error:
+            self._raise_api_error(response, error)
+        return self._response_data(response)
 
     def get_account_balance(self) -> Dict[str, Any]:
         """Return account-level and current-key usage from ``/account/balance``."""
@@ -86,10 +161,17 @@ class StructOCR:
                 f"{self.base_url}/account/balance",
                 timeout=self.timeout,
             )
-            response.raise_for_status()
-            return response.json()
         except requests.exceptions.RequestException as error:
-            raise RuntimeError(f"API request failed: {error}") from error
+            raise StructOCRError(
+                f"Network error while calling StructOCR API: {error}",
+                code="NETWORK_ERROR",
+                retryable=True,
+            ) from error
+        try:
+            response.raise_for_status()
+        except requests.exceptions.RequestException as error:
+            self._raise_api_error(response, error)
+        return self._response_data(response)
 
     def scan_passport(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("passport", file)
@@ -112,8 +194,31 @@ class StructOCR:
     def scan_hin(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("hin", file)
 
-    def scan_receipt(self, file: FileInput) -> Dict[str, Any]:
-        return self._post_image("receipt", file)
+    def scan_receipt(
+        self,
+        file: FileInput,
+        response_version: int = 1,
+        accuracy: str = "standard",
+    ) -> Dict[str, Any]:
+        if response_version not in (1, 2):
+            raise StructOCRError("response_version must be 1 or 2", code="INVALID_OPTIONS")
+        if accuracy not in ("standard", "enhanced"):
+            raise StructOCRError(
+                'accuracy must be "standard" or "enhanced"',
+                code="INVALID_OPTIONS",
+            )
+        if accuracy == "enhanced" and response_version != 2:
+            raise StructOCRError(
+                "Enhanced accuracy requires response_version=2",
+                code="INVALID_OPTIONS",
+            )
+        if response_version == 1 and accuracy == "standard":
+            return self._post_image("receipt", file)
+        return self._post_image(
+            "receipt",
+            file,
+            params={"response_version": response_version, "accuracy": accuracy},
+        )
 
     def scan_license_plate(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("license-plate", file)
@@ -123,3 +228,6 @@ class StructOCR:
 
     def scan_atm_cassette(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("atm-cassette", file)
+
+    def scan_weighbridge_ticket(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("weighbridge-ticket", file)

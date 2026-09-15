@@ -1,5 +1,4 @@
-__version__ = "1.5.0"
+from .client import StructOCR, StructOCRError
+from .version import __version__
 
-from .client import StructOCR
-
-__all__ = ['StructOCR']
+__all__ = ['StructOCR', 'StructOCRError']
