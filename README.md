@@ -49,6 +49,7 @@ result = client.scan_passport(content)
 scan_passport(file)
 scan_national_id(file)
 scan_driver_license(file)
+scan_driver_license_pdf417(file)
 scan_invoice(file)
 scan_receipt(file)
 scan_vin(file)
@@ -61,16 +62,25 @@ scan_weighbridge_ticket(file)
 get_account_balance()
 ```
 
-All document methods accept a local path or bytes. Supported decoded formats are JPG, PNG, WebP, and PDF, up to 4.5MB.
+All document methods accept a local path or bytes, up to 4.5MB. Most methods support JPG, PNG, WebP, and PDF. `scan_driver_license_pdf417` accepts JPG, PNG, and WebP only.
 
-Receipt v2 provides a richer response. Enhanced accuracy requires v2 and costs 2 credits instead of the standard 1 credit:
+The Receipt endpoint returns v2 by default. Enhanced accuracy costs 2 credits instead of the standard 1 credit and is enabled with the `accuracy` parameter:
 
 ```python
 receipt = client.scan_receipt(
     "./receipt.jpg",
-    response_version=2,
     accuracy="enhanced",
 )
+```
+
+`response_version=2` remains accepted for compatibility but is not required. Receipt v1 is retired.
+
+US driver license PDF417 example:
+
+```python
+result = client.scan_driver_license_pdf417("./license-back.jpg")
+if result.get("success"):
+    print(result["data"]["document_number"])
 ```
 
 Weighbridge ticket example:

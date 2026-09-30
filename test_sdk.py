@@ -67,27 +67,41 @@ class StructOCRTests(unittest.TestCase):
         self.client.scan_vehicle_registration(JPEG)
         self.client.scan_atm_cassette(JPEG)
         self.client.scan_weighbridge_ticket(JPEG)
+        self.client.scan_driver_license_pdf417(JPEG)
         self.assertEqual(self.client._post_image.call_args_list[0].args[0], "vehicle-registration")
         self.assertEqual(self.client._post_image.call_args_list[1].args[0], "atm-cassette")
         self.assertEqual(self.client._post_image.call_args_list[2].args[0], "weighbridge-ticket")
+        self.assertEqual(self.client._post_image.call_args_list[3].args[0], "driver-license-pdf417")
+        self.assertFalse(self.client._post_image.call_args_list[3].kwargs["allow_pdf"])
 
-    def test_receipt_options_preserve_v1_and_map_v2_enhanced(self):
+    def test_receipt_uses_v2_default_and_only_sends_enhanced_accuracy(self):
         self.client._post_image = Mock(return_value={"success": True})
         self.client.scan_receipt(JPEG)
-        self.client.scan_receipt(JPEG, response_version=2, accuracy="enhanced")
+        self.client.scan_receipt(JPEG, accuracy="enhanced")
+        self.client.scan_receipt(JPEG, response_version=2)
 
         self.assertEqual(self.client._post_image.call_args_list[0].args, ("receipt", JPEG))
         self.assertEqual(
             self.client._post_image.call_args_list[1].kwargs["params"],
-            {"response_version": 2, "accuracy": "enhanced"},
+            {"accuracy": "enhanced"},
+        )
+        self.assertEqual(
+            self.client._post_image.call_args_list[2].kwargs["params"],
+            {"response_version": 2},
         )
 
     def test_invalid_receipt_options_fail_before_request(self):
         self.client._post_image = Mock(return_value={"success": True})
         with self.assertRaises(StructOCRError) as caught:
-            self.client.scan_receipt(JPEG, response_version=1, accuracy="enhanced")
+            self.client.scan_receipt(JPEG, response_version=1)
         self.assertEqual(caught.exception.code, "INVALID_OPTIONS")
         self.client._post_image.assert_not_called()
+
+    def test_pdf417_rejects_pdf_before_request(self):
+        self.client.session.post = Mock()
+        with self.assertRaisesRegex(ValueError, "JPG, PNG, and WebP"):
+            self.client.scan_driver_license_pdf417(PDF)
+        self.client.session.post.assert_not_called()
 
     def test_structured_api_error(self):
         response = Mock(status_code=503)

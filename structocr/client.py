@@ -11,6 +11,7 @@ from .version import __version__
 FileInput = Union[str, os.PathLike, bytes, bytearray, memoryview]
 MAX_FILE_SIZE = int(4.5 * 1024 * 1024)
 SUPPORTED_FORMATS = "JPG, PNG, WebP, and PDF"
+IMAGE_ONLY_FORMATS = "JPG, PNG, and WebP"
 RETRYABLE_STATUS_CODES = {429, 502, 503, 504}
 
 
@@ -56,7 +57,7 @@ class StructOCR:
         })
 
     @staticmethod
-    def _read_file(file: FileInput) -> bytes:
+    def _read_file(file: FileInput, *, allow_pdf: bool = True) -> bytes:
         if isinstance(file, (bytes, bytearray, memoryview)):
             content = bytes(file)
         else:
@@ -69,8 +70,11 @@ class StructOCR:
             raise ValueError("File is empty")
         if len(content) > MAX_FILE_SIZE:
             raise ValueError("File exceeds the maximum allowed size of 4.5MB")
-        if StructOCR._detect_mime(content) is None:
+        mime_type = StructOCR._detect_mime(content)
+        if mime_type is None:
             raise ValueError(f"Unsupported file format. Supported formats: {SUPPORTED_FORMATS}")
+        if not allow_pdf and mime_type == "application/pdf":
+            raise ValueError(f"Unsupported file format. Supported formats: {IMAGE_ONLY_FORMATS}")
         return content
 
     @staticmethod
@@ -132,9 +136,11 @@ class StructOCR:
         endpoint: str,
         file: FileInput,
         params: Optional[Dict[str, Any]] = None,
+        *,
+        allow_pdf: bool = True,
     ) -> Dict[str, Any]:
         """Read a local file or bytes and send it as Base64 JSON in ``img``."""
-        content = self._read_file(file)
+        content = self._read_file(file, allow_pdf=allow_pdf)
         payload = {"img": base64.b64encode(content).decode("ascii")}
 
         try:
@@ -182,6 +188,9 @@ class StructOCR:
     def scan_driver_license(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("driver-license", file)
 
+    def scan_driver_license_pdf417(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("driver-license-pdf417", file, allow_pdf=False)
+
     def scan_invoice(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("invoice", file)
 
@@ -197,27 +206,30 @@ class StructOCR:
     def scan_receipt(
         self,
         file: FileInput,
-        response_version: int = 1,
+        response_version: Optional[int] = None,
         accuracy: str = "standard",
     ) -> Dict[str, Any]:
-        if response_version not in (1, 2):
-            raise StructOCRError("response_version must be 1 or 2", code="INVALID_OPTIONS")
+        if response_version not in (None, 2):
+            raise StructOCRError(
+                "response_version must be 2 when provided; Receipt v1 is retired",
+                code="INVALID_OPTIONS",
+            )
         if accuracy not in ("standard", "enhanced"):
             raise StructOCRError(
                 'accuracy must be "standard" or "enhanced"',
                 code="INVALID_OPTIONS",
             )
-        if accuracy == "enhanced" and response_version != 2:
-            raise StructOCRError(
-                "Enhanced accuracy requires response_version=2",
-                code="INVALID_OPTIONS",
-            )
-        if response_version == 1 and accuracy == "standard":
+        if accuracy == "standard" and response_version is None:
             return self._post_image("receipt", file)
+        params: Dict[str, Any] = {}
+        if response_version == 2:
+            params["response_version"] = 2
+        if accuracy == "enhanced":
+            params["accuracy"] = "enhanced"
         return self._post_image(
             "receipt",
             file,
-            params={"response_version": response_version, "accuracy": accuracy},
+            params=params,
         )
 
     def scan_license_plate(self, file: FileInput) -> Dict[str, Any]:
