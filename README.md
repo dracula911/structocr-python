@@ -1,8 +1,38 @@
 # StructOCR Python SDK
 
-Official Python client for the [StructOCR API](https://structocr.com/developers).
+Official Python client for the [StructOCR API](https://structocr.com/developers?utm_source=pypi&utm_medium=readme&utm_campaign=sdk).
+
+Send a photo or PDF of a passport, ID card, driver license, VIN, invoice, receipt or shipping container and get structured JSON back: one method call per document, no templates to train.
 
 The SDK accepts a local JPG, PNG, WebP, or PDF path, plus in-memory `bytes`. It validates the decoded file locally, converts it to Base64, and sends JSON as `{"img": "..."}`. The REST API also supports multipart uploads; this SDK release keeps Base64 JSON as its default transport for backward compatibility.
+
+## Get a free API key
+
+1. [Create an account](https://structocr.com/register?utm_source=pypi&utm_medium=readme&utm_campaign=sdk). New accounts get **200 free credits**, enough for 100 passport or driver license scans, and no credit card is needed.
+2. Copy your key from **API Keys** in the dashboard.
+3. Optionally try any document type on a sample image in the [Playground](https://structocr.com/dashboard/playground?utm_source=pypi&utm_medium=readme&utm_campaign=sdk) before you write code.
+
+After the free credits, packs start at $5 for 500 credits. There is no subscription and credits do not expire. See [pricing](https://structocr.com/pricing?utm_source=pypi&utm_medium=readme&utm_campaign=sdk).
+
+## Supported documents
+
+| Document | Method | Credits per scan |
+| --- | --- | --- |
+| Passport | `scan_passport` | 2 |
+| National ID card | `scan_national_id` | 2 |
+| Driver license (front) | `scan_driver_license` | 2 |
+| US/Canada driver license PDF417 barcode | `scan_driver_license_pdf417` | 2 |
+| Vehicle registration | `scan_vehicle_registration` | 2 |
+| VIN | `scan_vin` | 1 |
+| License plate | `scan_license_plate` | 1 |
+| Invoice | `scan_invoice` | 3 |
+| Receipt | `scan_receipt` | 1 |
+| Shipping container (ISO 6346) | `scan_container` | 1 |
+| Weighbridge ticket | `scan_weighbridge_ticket` | 2 |
+| ATM cassette | `scan_atm_cassette` | 1 |
+| HIN (boat hull number) | `scan_hin` | 1 |
+
+The receipt endpoint's optional enhanced mode costs 2 credits. Only successful requests are charged.
 
 ## Install
 
@@ -28,6 +58,28 @@ if result.get("success"):
     data = result["data"]
     print(data.get("passport_number"))
     print(data.get("given_names"), data.get("surname"))
+```
+
+A passport scan returns JSON like this (fictional sample document):
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "passport",
+    "country_code": "UTO",
+    "nationality": "UTOPIAN",
+    "passport_number": "X4R7T2K9P",
+    "surname": "MORGAN",
+    "given_names": "OLIVIA ROSE",
+    "sex": "F",
+    "date_of_birth": "1990-03-14",
+    "place_of_birth": "ZENITH CITY",
+    "date_of_issue": "2024-07-16",
+    "date_of_expiry": "2034-07-15",
+    "place_of_issue": null
+  }
+}
 ```
 
 PDF paths work the same way:
@@ -102,7 +154,7 @@ client = StructOCR(
 )
 ```
 
-See the [API documentation](https://structocr.com/developers) for endpoint-specific response schemas and error codes.
+See the [API documentation](https://structocr.com/developers?utm_source=pypi&utm_medium=readme&utm_campaign=sdk) for endpoint-specific response schemas and error codes.
 
 ## Errors
 
