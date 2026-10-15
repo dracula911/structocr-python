@@ -9,7 +9,8 @@ exec((ROOT / "structocr" / "version.py").read_text(encoding="utf-8"), VERSION)
 setup(
     name="structocr",
     version=VERSION["__version__"],
-    description="Official Python SDK for StructOCR Base64 document APIs, including images, PDFs, and account balance.",
+    description="Passport, ID card, driver license, VIN, invoice and receipt OCR: turn images and PDFs into structured JSON. Official StructOCR SDK for Python.",
+    keywords=["ocr", "passport ocr", "mrz", "id card ocr", "driver license ocr", "pdf417", "vin ocr", "invoice ocr", "receipt ocr", "kyc", "document ai", "structocr"],
     long_description=(ROOT / "README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="MIT",
@@ -22,7 +23,8 @@ setup(
     
     project_urls={
         "Homepage": "https://structocr.com",
-        "Documentation": "https://structocr.com/developers", 
+        "Documentation": "https://structocr.com/developers",
+        "Get a free API key": "https://structocr.com/register?utm_source=pypi&utm_medium=project_urls&utm_campaign=sdk",
         "Source": "https://github.com/dracula911/structocr-python",
         "Tracker": "https://github.com/dracula911/structocr-python/issues",
     },
