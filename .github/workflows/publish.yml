@@ -1,0 +1,53 @@
+# Publishes to PyPI when a GitHub release is published. The release tag must
+# match structocr/version.py (e.g. tag v1.7.2 for __version__ = "1.7.2").
+# Uses PyPI Trusted Publishing, so no API token is stored in GitHub: on
+# pypi.org, project structocr → Settings → Publishing, add a GitHub publisher
+# with owner dracula911, repository structocr-python, workflow publish.yml and
+# environment pypi.
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check the tag matches the package version
+        run: |
+          version=$(python -c "exec(open('structocr/version.py').read()); print(__version__)")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$version" != "$tag" ]; then
+            echo "Release tag $GITHUB_REF_NAME does not match version $version" >&2
+            exit 1
+          fi
+      - name: Test
+        run: |
+          pip install requests
+          python -m unittest test_sdk
+      - name: Build
+        run: |
+          pip install build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
