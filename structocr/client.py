@@ -191,14 +191,29 @@ class StructOCR:
     def scan_driver_license_pdf417(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("driver-license-pdf417", file, allow_pdf=False)
 
+    def scan_health_card(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("health-card", file)
+
+    def scan_proof_of_address(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("proof-of-address", file)
+
+    def scan_visa(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("visa", file)
+
     def scan_invoice(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("invoice", file)
 
     def scan_vin(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("vin", file)
 
+    def scan_vin_pro(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("vin-pro", file)
+
     def scan_container(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("container", file)
+
+    def scan_bill_of_lading(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("bill-of-lading", file)
 
     def scan_hin(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("hin", file)
@@ -237,6 +252,9 @@ class StructOCR:
 
     def scan_vehicle_registration(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("vehicle-registration", file)
+
+    def scan_auto_insurance(self, file: FileInput) -> Dict[str, Any]:
+        return self._post_image("auto-insurance", file)
 
     def scan_atm_cassette(self, file: FileInput) -> Dict[str, Any]:
         return self._post_image("atm-cassette", file)
