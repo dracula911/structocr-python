@@ -9,8 +9,8 @@ exec((ROOT / "structocr" / "version.py").read_text(encoding="utf-8"), VERSION)
 setup(
     name="structocr",
     version=VERSION["__version__"],
-    description="Passport, ID card, driver license, VIN, invoice and receipt OCR: turn images and PDFs into structured JSON. Official StructOCR SDK for Python.",
-    keywords=["ocr", "passport ocr", "mrz", "id card ocr", "driver license ocr", "pdf417", "vin ocr", "invoice ocr", "receipt ocr", "kyc", "document ai", "structocr"],
+    description="Structured OCR API SDK for Python: passports, visas, proof of address, health cards, IDs, driver licenses, auto insurance, VIN Pro, invoices, receipts, and bills of lading.",
+    keywords=["ocr", "passport ocr", "mrz", "id card ocr", "driver license ocr", "pdf417", "health card ocr", "proof of address ocr", "visa ocr", "vin ocr", "vin pro ocr", "auto insurance ocr", "invoice ocr", "receipt ocr", "bill of lading ocr", "freight ocr", "kyc", "document ai", "structocr"],
     long_description=(ROOT / "README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="MIT",

@@ -68,11 +68,54 @@ class StructOCRTests(unittest.TestCase):
         self.client.scan_atm_cassette(JPEG)
         self.client.scan_weighbridge_ticket(JPEG)
         self.client.scan_driver_license_pdf417(JPEG)
-        self.assertEqual(self.client._post_image.call_args_list[0].args[0], "vehicle-registration")
-        self.assertEqual(self.client._post_image.call_args_list[1].args[0], "atm-cassette")
-        self.assertEqual(self.client._post_image.call_args_list[2].args[0], "weighbridge-ticket")
-        self.assertEqual(self.client._post_image.call_args_list[3].args[0], "driver-license-pdf417")
+        self.client.scan_health_card(PDF)
+        self.client.scan_proof_of_address(PDF)
+        self.client.scan_visa(PDF)
+        self.client.scan_vin_pro(JPEG)
+        self.client.scan_auto_insurance(PDF)
+        self.client.scan_bill_of_lading(PDF)
+        self.assertEqual(
+            [call.args[0] for call in self.client._post_image.call_args_list],
+            [
+                "vehicle-registration",
+                "atm-cassette",
+                "weighbridge-ticket",
+                "driver-license-pdf417",
+                "health-card",
+                "proof-of-address",
+                "visa",
+                "vin-pro",
+                "auto-insurance",
+                "bill-of-lading",
+            ],
+        )
         self.assertFalse(self.client._post_image.call_args_list[3].kwargs["allow_pdf"])
+
+    def test_new_document_endpoints_accept_pdf_bytes(self):
+        response = Mock()
+        response.json.return_value = {"success": True}
+        response.raise_for_status.return_value = None
+        self.client.session.post = Mock(return_value=response)
+
+        self.client.scan_proof_of_address(PDF)
+        self.client.scan_visa(PDF)
+        self.client.scan_bill_of_lading(PDF)
+        self.client.scan_health_card(PDF)
+        self.client.scan_auto_insurance(PDF)
+
+        called_urls = [call.args[0] for call in self.client.session.post.call_args_list]
+        self.assertEqual(
+            called_urls,
+            [
+                "https://example.test/v1/proof-of-address",
+                "https://example.test/v1/visa",
+                "https://example.test/v1/bill-of-lading",
+                "https://example.test/v1/health-card",
+                "https://example.test/v1/auto-insurance",
+            ],
+        )
+        for call in self.client.session.post.call_args_list:
+            self.assertEqual(base64.b64decode(call.kwargs["json"]["img"]), PDF)
 
     def test_receipt_uses_v2_default_and_only_sends_enhanced_accuracy(self):
         self.client._post_image = Mock(return_value={"success": True})
